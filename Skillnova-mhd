@@ -1,0 +1,295 @@
+from flask import Flask, render_template_string
+
+app = Flask(__name__)
+
+# We fix the errors by embedding the CSS in <style> and JS in <script> tags
+# and removing the broken external links.
+html_code = """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SkillNova Labs</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background: #f8f9fb;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px;
+      background: #fff;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .logo {
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    .logo span {
+      color: #22c55e;
+    }
+
+    .menu-icon {
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    .signup-btn {
+      background: #22c55e;
+      color: #fff;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 6px;
+    }
+
+    /* Side Menu */
+    .side-menu {
+      position: fixed;
+      top: 0;
+      left: -250px;
+      width: 250px;
+      height: 100%;
+      background: #111;
+      padding: 20px;
+      transition: 0.3s;
+      z-index: 1000; /* Added z-index so it sits on top */
+    }
+
+    .side-menu a {
+      display: block;
+      color: #fff;
+      text-decoration: none;
+      margin: 20px 0;
+    }
+
+    .close-btn {
+      color: #fff;
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    /* Hero */
+    .hero {
+      padding: 30px;
+      background: linear-gradient(to right, #e0f2fe, #fef3c7);
+    }
+
+    .hero h1 {
+      margin-bottom: 15px;
+    }
+
+    .hero ul {
+      list-style: none;
+      margin-bottom: 10px;
+    }
+
+    .price {
+      font-size: 20px;
+      margin: 10px 0;
+    }
+
+    .enroll-btn {
+      background: #22c55e;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+    }
+
+    /* Search */
+    .search-section {
+      padding: 20px;
+    }
+
+    .search-section input {
+      width: 100%;
+      padding: 10px;
+    }
+
+    /* Courses */
+    .courses {
+      padding: 20px;
+    }
+
+    .course-card {
+      background: #fff;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+    }
+
+    .badge {
+      background: #3b82f6;
+      color: #fff;
+      padding: 4px 8px;
+      border-radius: 5px;
+      font-size: 12px;
+    }
+
+    .free-text {
+      color: #16a34a;
+      margin: 10px 0;
+    }
+
+    .cert-btn {
+      width: 100%;
+      padding: 8px;
+    }
+
+    /* App Banner */
+    .app-banner {
+      background: #e0f2fe;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .install-btn {
+      background: #22c55e;
+      border: none;
+      color: #fff;
+      padding: 8px 16px;
+    }
+
+    /* Footer */
+    .footer {
+      background: #111;
+      color: #ccc;
+      padding: 25px;
+      text-align: center;
+    }
+
+    .refer-btn {
+      margin: 15px 0;
+      padding: 8px 16px;
+    }
+
+    .socials span {
+      font-size: 20px;
+      margin: 0 5px;
+    }
+
+    .copyright {
+      margin-top: 20px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <div class="menu-icon" id="menuBtn">&#9776;</div>
+  <div class="logo">SkillNova<span>Labs</span></div>
+  <button class="signup-btn">Sign Up</button>
+</header>
+
+<nav class="side-menu" id="sideMenu">
+  <span class="close-btn" id="closeBtn">&times;</span>
+  <a href="#">Home</a>
+  <a href="#">Courses</a>
+  <a href="#">Certifications</a>
+  <a href="#">About Us</a>
+  <a href="#">Contact</a>
+</nav>
+
+<section class="hero">
+  <h1>Master Data & AI Skills from Scratch</h1>
+  <ul>
+    <li>✔ 10 Industry Courses</li>
+    <li>✔ Lifetime Access</li>
+    <li>✔ 100% Online</li>
+  </ul>
+  <p class="price">Special Price – ₹1299</p>
+  <button class="enroll-btn">Enroll Now</button>
+</section>
+
+<section class="search-section">
+  <input type="text" placeholder="Search for anything...">
+</section>
+
+<section class="courses">
+  <h2>All Free Courses</h2>
+
+  <div class="course-card">
+    <span class="badge">Free</span>
+    <h3>Blockchain Basics</h3>
+    <p>⏱ 4 Hours | 🌐 English</p>
+    <p class="free-text">Learn for FREE</p>
+    <button class="cert-btn">Pay for Certification</button>
+  </div>
+
+  <div class="course-card">
+    <span class="badge">Free</span>
+    <h3>AI for Beginners</h3>
+    <p>⏱ 5 Hours | 🌐 English</p>
+    <p class="free-text">Learn for FREE</p>
+    <button class="cert-btn">Pay for Certification</button>
+  </div>
+</section>
+
+<section class="app-banner">
+  <h3>Install the SkillNova App</h3>
+  <p>⭐ 4.9 | 10K+ Downloads</p>
+  <button class="install-btn">INSTALL</button>
+</section>
+
+<footer class="footer">
+  <h3>SkillNova Labs Pvt. Ltd.</h3>
+  <p>
+    SkillNova Labs is a technology-focused learning platform founded in 2018.
+    We empower learners with practical, real-world skills across Data Analytics,
+    AI, Cloud Computing, and Full Stack Development.
+  </p>
+
+  <button class="refer-btn">Refer & Earn</button>
+
+  <div class="socials">
+    <span>🌐</span>
+    <span>📸</span>
+    <span>💼</span>
+    <span>▶️</span>
+  </div>
+
+  <p class="copyright">
+    © 2026 SkillNova Labs. All Rights Reserved.
+  </p>
+</footer>
+
+<script>
+  const menuBtn = document.getElementById("menuBtn");
+  const closeBtn = document.getElementById("closeBtn");
+  const sideMenu = document.getElementById("sideMenu");
+
+  menuBtn.addEventListener("click", () => {
+    sideMenu.style.left = "0";
+  });
+
+  closeBtn.addEventListener("click", () => {
+    sideMenu.style.left = "-250px";
+  });
+</script>
+
+</body>
+</html>
+"""
+
+@app.route('/')
+def home():
+    return render_template_string(html_code)
+
+if __name__ == '__main__':
+    # Run the app on localhost
+    print("Starting server... Go to http://127.0.0.1:5000/ in your browser")
+    app.run(debug=True, port=5000)
